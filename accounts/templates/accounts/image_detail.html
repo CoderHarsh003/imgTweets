@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Detail</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #333;
+      padding: 10px 20px;
+      color: white;
+    }
+
+    .navbar .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .navbar .buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .navbar .buttons a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      background-color: #555;
+      transition: background-color 0.3s;
+    }
+
+    .navbar .buttons a:hover {
+      background-color: #777;
+    }
+
+    .container {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .image-section {
+      flex: 1;
+    }
+
+    .image-section img {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-section .likes {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    .comments-section {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .comments-section h2 {
+      margin-bottom: 10px;
+    }
+
+    .comments-section .comment {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+
+    .comments-section .comment p {
+      margin: 0;
+    }
+
+    .comments-section .comment .username {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .comments-section .comment .text {
+      margin-top: 5px;
+      color: #555;
+    }
+
+    .comments-section form {
+      margin-top: 20px;
+    }
+
+    .comments-section form textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+    }
+
+    .comments-section form button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .comments-section form button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div class="logo">Logo</div>
+    <div class="buttons">
+      {% if user.is_authenticated %}
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'profile' %}">Profile</a>
+        <a href="{% url 'logout' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Register</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Image Section -->
+    <div class="image-section">
+      <img src="{{ image.image.url }}" alt="Uploaded Image">
+      <div class="likes">
+        {{ image.total_likes }} Likes
+        {% if user.is_authenticated %}
+          <form method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" name="like">
+              {% if user in image.likes.all %} Unlike {% else %} Like {% endif %}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+      <h2>Comments</h2>
+      {% for comment in comments %}
+        <div class="comment">
+          <p class="username">{{ comment.user.username }}</p>
+          <p class="text">{{ comment.text }}</p>
+        </div>
+      {% empty %}
+        <p>No comments yet.</p>
+      {% endfor %}
+
+      <!-- Comment Form -->
+      {% if user.is_authenticated %}
+        <form method="post">
+          {% csrf_token %}
+          {{ comment_form.text }}
+          <button type="submit" name="comment">Add Comment</button>
+        </form>
+      {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
